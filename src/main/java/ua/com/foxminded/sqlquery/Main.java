@@ -19,6 +19,9 @@ public class Main {
         System.out.println("\nSQL query should find if any of the groups has less than 10 students.");
 
         postgreSQL.findGroupWithLessThan10Students();
+
+        System.out.println("SQL query should delete all students from group with name \"SR-01\"");
+        postgreSQL.deleteStudentFromGroup();
     }
 
 }

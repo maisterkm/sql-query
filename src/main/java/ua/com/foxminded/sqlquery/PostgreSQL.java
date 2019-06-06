@@ -1,6 +1,7 @@
 package ua.com.foxminded.sqlquery;
 
 import java.sql.*;
+import java.util.ArrayList;
 
 public class PostgreSQL {
 
@@ -17,14 +18,9 @@ public class PostgreSQL {
         } catch (ClassNotFoundException e) {
             System.out.println(e.getMessage());
         }
-      //  try {
             //STEP 3: Open a connection
             dbConnection = DriverManager.getConnection(DB_URL,USER, PASS);
             return dbConnection;
-        //} catch (SQLException e) {
-        //    System.out.println(e.getMessage());
-       // }
-       // return dbConnection;
     }
 
     public static void createTables() throws SQLException {
@@ -240,26 +236,52 @@ public class PostgreSQL {
         dbConnection = getDBConnection();
         statement = dbConnection.createStatement();
 
-        String selectQuery = "SELECT GROUPS.name, COUNT(STUDENTS.student_id) AS number\n" +
+        String sqlQuery = "SELECT GROUPS.name, COUNT(STUDENTS.student_id) AS number\n" +
                 "FROM GROUPS\n" +
                 "INNER JOIN STUDENTS ON STUDENTS.group_id =GROUPS.group_id\n" +
                 "GROUP BY GROUPS.group_id\n" +
                 "HAVING COUNT(STUDENTS.student_id) < 10;";
 
-        ResultSet rs = statement.executeQuery(selectQuery);
-
+        ResultSet rs = statement.executeQuery(sqlQuery);
         while(rs.next()) {
             String name = rs.getString("name");
             int numberOfStudent = rs.getInt("number");
             resultStr += "group " + name + " has " + numberOfStudent + " students";
             System.out.println(resultStr);
         }
-
         dbConnection.close();
         statement.close();
-
         return resultStr;
     }
 
+    public void deleteStudentFromGroup() throws SQLException {
+        Connection dbConnection = null;
+        Statement statement = null;
+
+        dbConnection = getDBConnection();
+        statement = dbConnection.createStatement();
+
+        String sqlQuery = "SELECT STUDENTS.student_id\n" +
+                "      FROM STUDENTS\n" +
+                "        INNER JOIN  GROUPS ON STUDENTS.group_id = GROUPS.group_id\n" +
+                "      WHERE GROUPS.name = 'SR-01';";
+
+        ResultSet rs = statement.executeQuery(sqlQuery);
+        ArrayList<Integer> l1 = new ArrayList<Integer>();
+        while(rs.next()) {
+            int student_id = rs.getInt("student_id");
+            l1.add(student_id);
+        }
+
+        for (Integer item : l1) {
+            String sqlDeleteInTableStudentsQuery = "DELETE FROM STUDENTS WHERE STUDENTS.student_id = " + item;
+            String sqlDeleteInTableAttendanceOfCoursesQuery = "DELETE FROM ATTENDANCEOFCOURSES WHERE ATTENDANCEOFCOURSES.student_id = " + item;
+            statement.executeUpdate(sqlDeleteInTableAttendanceOfCoursesQuery);
+            statement.executeUpdate(sqlDeleteInTableStudentsQuery);
+        }
+
+        dbConnection.close();
+        statement.close();
+    }
 
     }
