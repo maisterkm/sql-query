@@ -15,11 +15,13 @@ public class PostgreSQL {
     private static Connection getDBConnection() {
         Connection dbConnection = null;
         try {
+            //STEP 2: Register JDBC driver
             Class.forName(DB_DRIVER);
         } catch (ClassNotFoundException e) {
             System.out.println(e.getMessage());
         }
         try {
+            //STEP 3: Open a connection
             dbConnection = DriverManager.getConnection(DB_URL,USER, PASS);
             return dbConnection;
         } catch (SQLException e) {
@@ -57,7 +59,6 @@ public class PostgreSQL {
                 "  FOREIGN KEY (student_id) REFERENCES STUDENTS (student_id),\n" +
                 "  FOREIGN KEY (course_id) REFERENCES COURSES (course_id)\n" +
                 ");";
-
         try {
             dbConnection = getDBConnection();
             statement = dbConnection.createStatement();
@@ -68,12 +69,11 @@ public class PostgreSQL {
             statement.execute(createStudentsTable);
             statement.execute(createAttendanceOfCoursesTable);
             System.out.println("Tables \"COURSES\", \"GROUPS\", \"STUDENTS\", \"ATTENDANCEOFCOURSES\" are created!");
-
-            dbConnection.close();
-            statement.close();
-
         } catch (SQLException e) {
             System.out.println(e.getMessage());
+        } finally {
+            dbConnection.close();
+            statement.close();
         }
     }
 
@@ -226,6 +226,35 @@ public class PostgreSQL {
             statement.close();
         } catch (SQLException e) {
             e.printStackTrace();
+        }
+    }
+
+    public static void dropTables() throws SQLException {
+        Connection dbConnection = null;
+        Statement statement = null;
+
+        String dropCoursesTable = "DROP TABLE COURSES;";
+
+        String dropGroupsTable = "DROP TABLE GROUPS;";
+
+        String dropStudentsTable = "DROP TABLE STUDENTS;";
+
+        String dropAttendanceOfCoursesTable = "DROP TABLE ATTENDANCEOFCOURSES;";
+        try {
+            dbConnection = getDBConnection();
+            statement = dbConnection.createStatement();
+
+            // Execute SQL query
+            statement.execute(dropAttendanceOfCoursesTable);
+            statement.execute(dropStudentsTable);
+            statement.execute(dropCoursesTable);
+            statement.execute(dropGroupsTable);
+            System.out.println("Tables \"COURSES\", \"GROUPS\", \"STUDENTS\", \"ATTENDANCEOFCOURSES\" are deleted!");
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        } finally {
+            dbConnection.close();
+            statement.close();
         }
     }
 
