@@ -4,25 +4,21 @@ import java.sql.SQLException;
 
 public class Main {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws SQLException {
         PostgreSQL postgreSQL = new PostgreSQL();
 
-        try {
-            postgreSQL.dropTables();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        postgreSQL.dropTables();
 
-        try {
-            postgreSQL.createTables();
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }
+        postgreSQL.createTables();
 
         postgreSQL.insertIntoCoursesTable();
         postgreSQL.insertIntoGroupsTable();
         postgreSQL.insertIntoStudentsTable();
         postgreSQL.insertIntoAttandanceOfCoursesTable();
+
+        System.out.println("\nSQL query should find if any of the groups has less than 10 students.");
+
+        postgreSQL.findGroupWithLessThan10Students();
     }
 
 }

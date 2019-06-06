@@ -1,9 +1,6 @@
 package ua.com.foxminded.sqlquery;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 
 public class PostgreSQL {
 
@@ -12,7 +9,7 @@ public class PostgreSQL {
     private static final String USER = "username";
     private static final String PASS = "password";
 
-    private static Connection getDBConnection() {
+    private static Connection getDBConnection() throws SQLException{
         Connection dbConnection = null;
         try {
             //STEP 2: Register JDBC driver
@@ -20,14 +17,14 @@ public class PostgreSQL {
         } catch (ClassNotFoundException e) {
             System.out.println(e.getMessage());
         }
-        try {
+      //  try {
             //STEP 3: Open a connection
             dbConnection = DriverManager.getConnection(DB_URL,USER, PASS);
             return dbConnection;
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }
-        return dbConnection;
+        //} catch (SQLException e) {
+        //    System.out.println(e.getMessage());
+       // }
+       // return dbConnection;
     }
 
     public static void createTables() throws SQLException {
@@ -59,25 +56,21 @@ public class PostgreSQL {
                 "  FOREIGN KEY (student_id) REFERENCES STUDENTS (student_id),\n" +
                 "  FOREIGN KEY (course_id) REFERENCES COURSES (course_id)\n" +
                 ");";
-        try {
+
             dbConnection = getDBConnection();
             statement = dbConnection.createStatement();
 
-            // Execute SQL query
             statement.execute(createCoursesTable);
             statement.execute(createGroupsTable);
             statement.execute(createStudentsTable);
             statement.execute(createAttendanceOfCoursesTable);
             System.out.println("Tables \"COURSES\", \"GROUPS\", \"STUDENTS\", \"ATTENDANCEOFCOURSES\" are created!");
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        } finally {
+
             dbConnection.close();
             statement.close();
-        }
     }
 
-    public static void insertIntoCoursesTable() {
+    public static void insertIntoCoursesTable() throws SQLException {
 
         Connection dbConnection = null;
         Statement statement = null;
@@ -88,7 +81,6 @@ public class PostgreSQL {
                 "  ('Mathematical analysis', 'Prof. Markus, 120 hours'),\n" +
                 "  ('Statistic', 'Prof. Rey, 70 hours');";
 
-        try {
             dbConnection = getDBConnection();
             statement = dbConnection.createStatement();
 
@@ -97,12 +89,9 @@ public class PostgreSQL {
 
             dbConnection.close();
             statement.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
     }
 
-    public static void insertIntoGroupsTable() {
+    public static void insertIntoGroupsTable() throws SQLException {
 
         Connection dbConnection = null;
         Statement statement = null;
@@ -113,7 +102,6 @@ public class PostgreSQL {
                 "  ('SR-02'),\n" +
                 "  ('SR-03');";
 
-        try {
             dbConnection = getDBConnection();
             statement = dbConnection.createStatement();
 
@@ -122,12 +110,9 @@ public class PostgreSQL {
 
             dbConnection.close();
             statement.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
     }
 
-    public static void insertIntoStudentsTable() {
+    public static void insertIntoStudentsTable() throws SQLException {
 
         Connection dbConnection = null;
         Statement statement = null;
@@ -164,7 +149,6 @@ public class PostgreSQL {
                 "  (3, 'first_name_28', 'last_name_28'),\n" +
                 "  (3, 'first_name_29', 'last_name_29');";
 
-        try {
             dbConnection = getDBConnection();
             statement = dbConnection.createStatement();
 
@@ -173,12 +157,9 @@ public class PostgreSQL {
 
             dbConnection.close();
             statement.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
     }
 
-    public static void insertIntoAttandanceOfCoursesTable() {
+    public static void insertIntoAttandanceOfCoursesTable() throws SQLException {
 
         Connection dbConnection = null;
         Statement statement = null;
@@ -215,7 +196,6 @@ public class PostgreSQL {
                 "  (28, 3),\n" +
                 "  (29, 3);";
 
-        try {
             dbConnection = getDBConnection();
             statement = dbConnection.createStatement();
 
@@ -224,9 +204,6 @@ public class PostgreSQL {
 
             dbConnection.close();
             statement.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
     }
 
     public static void dropTables() throws SQLException {
@@ -234,11 +211,8 @@ public class PostgreSQL {
         Statement statement = null;
 
         String dropCoursesTable = "DROP TABLE COURSES;";
-
         String dropGroupsTable = "DROP TABLE GROUPS;";
-
         String dropStudentsTable = "DROP TABLE STUDENTS;";
-
         String dropAttendanceOfCoursesTable = "DROP TABLE ATTENDANCEOFCOURSES;";
         try {
             dbConnection = getDBConnection();
@@ -258,4 +232,34 @@ public class PostgreSQL {
         }
     }
 
-}
+    public static String findGroupWithLessThan10Students() throws SQLException {
+        String resultStr = "";
+        Connection dbConnection = null;
+        Statement statement = null;
+
+        dbConnection = getDBConnection();
+        statement = dbConnection.createStatement();
+
+        String selectQuery = "SELECT GROUPS.name, COUNT(STUDENTS.student_id) AS number\n" +
+                "FROM GROUPS\n" +
+                "INNER JOIN STUDENTS ON STUDENTS.group_id =GROUPS.group_id\n" +
+                "GROUP BY GROUPS.group_id\n" +
+                "HAVING COUNT(STUDENTS.student_id) < 10;";
+
+        ResultSet rs = statement.executeQuery(selectQuery);
+
+        while(rs.next()) {
+            String name = rs.getString("name");
+            int numberOfStudent = rs.getInt("number");
+            resultStr += "group " + name + " has " + numberOfStudent + " students";
+            System.out.println(resultStr);
+        }
+
+        dbConnection.close();
+        statement.close();
+
+        return resultStr;
+    }
+
+
+    }
