@@ -243,10 +243,40 @@ public class PostgreSQL {
             statement2.executeUpdate(sqlDeleteInTableAttendanceOfCoursesQuery);
             statement3.executeUpdate(sqlDeleteInTableStudentsQuery);
         }
+        System.out.println("All students from group with name \"" + groupName + "\"" + " were deleted");
         dbConnection.close();
         statement1.close();
         statement2.close();
         statement3.close();
     }
 
+    public String findStudentsByNameOfCourse() throws SQLException {
+        String resultStr = "";
+        Connection dbConnection = getDBConnection();
+        Statement statement = dbConnection.createStatement();
+
+        String sqlQuery = "SELECT\n" +
+                "  SUBQ.name,\n" +
+                "  STUDENTS.first_name,\n" +
+                "  STUDENTS.last_name\n" +
+                "FROM STUDENTS\n" +
+                "  INNER JOIN (SELECT ATTENDANCEOFCOURSES.student_id, COURSES.name\n" +
+                "              FROM ATTENDANCEOFCOURSES\n" +
+                "                INNER JOIN COURSES ON ATTENDANCEOFCOURSES.course_id = COURSES.course_id\n" +
+                "              ) AS SUBQ ON STUDENTS.student_id = SUBQ.student_id;";
+
+        ResultSet rs = statement.executeQuery(sqlQuery);
+        resultStr = "--------------------------------------------------------\n";
+        resultStr += String.format("%1$-23s | %2$-15s | %3$-15s%n", "Name of course", "First name", "Last name");
+        resultStr += "--------------------------------------------------------\n";
+        while (rs.next()) {
+            String course_name = rs.getString("name");
+            String first_name = rs.getString("first_name");
+            String last_name = rs.getString("last_name");
+            resultStr += String.format("%1$-23s | %2$-15s | %3$-15s%n", course_name, first_name, last_name);
+        }
+        return resultStr;
+    }
+
 }
+

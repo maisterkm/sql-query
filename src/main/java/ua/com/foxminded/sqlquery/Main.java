@@ -16,11 +16,14 @@ public class Main {
         postgreSQL.insertIntoStudentsTable();
         postgreSQL.insertIntoAttandanceOfCoursesTable();
 
-        System.out.println("\nSQL query should find if any of the groups has less than 10 students.");
+        System.out.println("\n1. SQL query should find if any of the groups has less than 10 students.");
         postgreSQL.findGroupWithLessThan10Students();
 
-        //SQL query should delete all students from group with name "SR-01"
+        System.out.println("\n2. SQL query should delete all students from group with name \"SR-01\"");
         postgreSQL.deleteStudentFromGroup("SR-01");
+
+        System.out.println("\n3. Write SQL query that finds name of course and related students");
+        System.out.println(postgreSQL.findStudentsByNameOfCourse());
     }
 
 }
