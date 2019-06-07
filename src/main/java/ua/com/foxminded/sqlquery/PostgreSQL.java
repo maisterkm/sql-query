@@ -1,16 +1,14 @@
 package ua.com.foxminded.sqlquery;
 
 import java.sql.*;
-import java.util.ArrayList;
 
 public class PostgreSQL {
-
     private static final String DB_DRIVER = "org.postgresql.Driver";
     private static final String DB_URL = "jdbc:postgresql://localhost:5432/university";
     private static final String USER = "username";
     private static final String PASS = "password";
 
-    private static Connection getDBConnection() throws SQLException{
+    private static Connection getDBConnection() throws SQLException {
         Connection dbConnection = null;
         try {
             //STEP 2: Register JDBC driver
@@ -18,34 +16,32 @@ public class PostgreSQL {
         } catch (ClassNotFoundException e) {
             System.out.println(e.getMessage());
         }
-            //STEP 3: Open a connection
-            dbConnection = DriverManager.getConnection(DB_URL,USER, PASS);
-            return dbConnection;
+        //STEP 3: Open a connection
+        dbConnection = DriverManager.getConnection(DB_URL, USER, PASS);
+        return dbConnection;
     }
 
     public static void createTables() throws SQLException {
-        Connection dbConnection = null;
-        Statement statement = null;
 
-        String createCoursesTable = "CREATE TABLE COURSES (\n" +
+        String createCoursesTable = "CREATE TABLE IF NOT EXISTS COURSES (\n" +
                 "  course_id SERIAL PRIMARY KEY,\n" +
                 "  name VARCHAR(255) UNIQUE NOT NULL,\n" +
                 "  description VARCHAR(255)\n" +
                 ");";
 
-        String createGroupsTable = "CREATE TABLE GROUPS (\n" +
+        String createGroupsTable = "CREATE TABLE IF NOT EXISTS GROUPS (\n" +
                 "  group_id SERIAL PRIMARY KEY,\n" +
                 "  name VARCHAR(255) UNIQUE NOT NULL\n" +
                 ");";
 
-        String createStudentsTable = "CREATE TABLE STUDENTS (\n" +
+        String createStudentsTable = "CREATE TABLE IF NOT EXISTS STUDENTS (\n" +
                 "  student_id SERIAL PRIMARY KEY,\n" +
                 "  group_id INTEGER REFERENCES GROUPS (group_id),\n" +
                 "  first_name VARCHAR(255) NOT NULL,\n" +
                 "  last_name VARCHAR(255) NOT NULL\n" +
                 ");";
 
-        String createAttendanceOfCoursesTable = "CREATE TABLE ATTENDANCEOFCOURSES (\n" +
+        String createAttendanceOfCoursesTable = "CREATE TABLE IF NOT EXISTS ATTENDANCEOFCOURSES (\n" +
                 "  student_id INTEGER NOT NULL,\n" +
                 "  course_id INTEGER NOT NULL,\n" +
                 "  PRIMARY KEY (student_id, course_id),\n" +
@@ -53,66 +49,54 @@ public class PostgreSQL {
                 "  FOREIGN KEY (course_id) REFERENCES COURSES (course_id)\n" +
                 ");";
 
-            dbConnection = getDBConnection();
-            statement = dbConnection.createStatement();
+        Connection dbConnection = getDBConnection();
+        Statement statement = dbConnection.createStatement();
 
-            statement.execute(createCoursesTable);
-            statement.execute(createGroupsTable);
-            statement.execute(createStudentsTable);
-            statement.execute(createAttendanceOfCoursesTable);
-            System.out.println("Tables \"COURSES\", \"GROUPS\", \"STUDENTS\", \"ATTENDANCEOFCOURSES\" are created!");
+        statement.execute(createCoursesTable);
+        statement.execute(createGroupsTable);
+        statement.execute(createStudentsTable);
+        statement.execute(createAttendanceOfCoursesTable);
+        System.out.println("Tables \"COURSES\", \"GROUPS\", \"STUDENTS\", \"ATTENDANCEOFCOURSES\" are created!");
 
-            dbConnection.close();
-            statement.close();
+        dbConnection.close();
+        statement.close();
     }
 
     public static void insertIntoCoursesTable() throws SQLException {
-
-        Connection dbConnection = null;
-        Statement statement = null;
-
         String insertIntoCoursesTable = "INSERT INTO COURSES (name, description)\n" +
                 "VALUES\n" +
                 "  ('Discrete Math', 'Prof. Cristian, 80 hours'),\n" +
                 "  ('Mathematical analysis', 'Prof. Markus, 120 hours'),\n" +
                 "  ('Statistic', 'Prof. Rey, 70 hours');";
 
-            dbConnection = getDBConnection();
-            statement = dbConnection.createStatement();
+        Connection dbConnection = getDBConnection();
+        Statement statement = dbConnection.createStatement();
 
-            statement.executeUpdate(insertIntoCoursesTable);
-            System.out.println("Datas has been inserted into table COURSES");
+        statement.executeUpdate(insertIntoCoursesTable);
+        System.out.println("Datas has been inserted into table COURSES");
 
-            dbConnection.close();
-            statement.close();
+        dbConnection.close();
+        statement.close();
     }
 
     public static void insertIntoGroupsTable() throws SQLException {
-
-        Connection dbConnection = null;
-        Statement statement = null;
-
         String insertIntoGroupsTable = "INSERT INTO GROUPS (name)\n" +
                 "VALUES\n" +
                 "  ('SR-01'),\n" +
                 "  ('SR-02'),\n" +
                 "  ('SR-03');";
 
-            dbConnection = getDBConnection();
-            statement = dbConnection.createStatement();
+        Connection dbConnection = getDBConnection();
+        Statement statement = dbConnection.createStatement();
 
-            statement.executeUpdate(insertIntoGroupsTable);
-            System.out.println("Datas has been inserted into table GROUPS");
+        statement.executeUpdate(insertIntoGroupsTable);
+        System.out.println("Datas has been inserted into table GROUPS");
 
-            dbConnection.close();
-            statement.close();
+        dbConnection.close();
+        statement.close();
     }
 
     public static void insertIntoStudentsTable() throws SQLException {
-
-        Connection dbConnection = null;
-        Statement statement = null;
-
         String insertIntoStudentsTable = "INSERT INTO STUDENTS (group_id, first_name, last_name)\n" +
                 "VALUES\n" +
                 "  (1, 'first_name_1', 'last_name_1'),\n" +
@@ -145,21 +129,17 @@ public class PostgreSQL {
                 "  (3, 'first_name_28', 'last_name_28'),\n" +
                 "  (3, 'first_name_29', 'last_name_29');";
 
-            dbConnection = getDBConnection();
-            statement = dbConnection.createStatement();
+        Connection dbConnection = getDBConnection();
+        Statement statement = dbConnection.createStatement();
 
-            statement.executeUpdate(insertIntoStudentsTable);
-            System.out.println("Datas has been inserted into table STUDENTS");
+        statement.executeUpdate(insertIntoStudentsTable);
+        System.out.println("Datas has been inserted into table STUDENTS");
 
-            dbConnection.close();
-            statement.close();
+        dbConnection.close();
+        statement.close();
     }
 
     public static void insertIntoAttandanceOfCoursesTable() throws SQLException {
-
-        Connection dbConnection = null;
-        Statement statement = null;
-
         String insertIntoAttandanceOfCoursesTable = "INSERT INTO ATTENDANCEOFCOURSES (student_id, course_id)\n" +
                 "VALUES\n" +
                 "  (1, 1),\n" +
@@ -192,49 +172,39 @@ public class PostgreSQL {
                 "  (28, 3),\n" +
                 "  (29, 3);";
 
-            dbConnection = getDBConnection();
-            statement = dbConnection.createStatement();
+        Connection dbConnection = getDBConnection();
+        Statement statement = dbConnection.createStatement();
 
-            statement.executeUpdate(insertIntoAttandanceOfCoursesTable);
-            System.out.println("Datas has been inserted into table ATTENDANCEOFCOURSES");
+        statement.executeUpdate(insertIntoAttandanceOfCoursesTable);
+        System.out.println("Datas has been inserted into table ATTENDANCEOFCOURSES");
 
-            dbConnection.close();
-            statement.close();
+        dbConnection.close();
+        statement.close();
     }
 
     public static void dropTables() throws SQLException {
-        Connection dbConnection = null;
-        Statement statement = null;
-
         String dropCoursesTable = "DROP TABLE COURSES;";
         String dropGroupsTable = "DROP TABLE GROUPS;";
         String dropStudentsTable = "DROP TABLE STUDENTS;";
         String dropAttendanceOfCoursesTable = "DROP TABLE ATTENDANCEOFCOURSES;";
-        try {
-            dbConnection = getDBConnection();
-            statement = dbConnection.createStatement();
 
-            // Execute SQL query
-            statement.execute(dropAttendanceOfCoursesTable);
-            statement.execute(dropStudentsTable);
-            statement.execute(dropCoursesTable);
-            statement.execute(dropGroupsTable);
-            System.out.println("Tables \"COURSES\", \"GROUPS\", \"STUDENTS\", \"ATTENDANCEOFCOURSES\" are deleted!");
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        } finally {
-            dbConnection.close();
-            statement.close();
-        }
+        Connection dbConnection = getDBConnection();
+        Statement statement = dbConnection.createStatement();
+
+        statement.execute(dropAttendanceOfCoursesTable);
+        statement.execute(dropStudentsTable);
+        statement.execute(dropCoursesTable);
+        statement.execute(dropGroupsTable);
+        System.out.println("Tables \"COURSES\", \"GROUPS\", \"STUDENTS\", \"ATTENDANCEOFCOURSES\" are deleted!");
+        dbConnection.close();
+        statement.close();
     }
 
     public static String findGroupWithLessThan10Students() throws SQLException {
         String resultStr = "";
-        Connection dbConnection = null;
-        Statement statement = null;
 
-        dbConnection = getDBConnection();
-        statement = dbConnection.createStatement();
+        Connection dbConnection = getDBConnection();
+        Statement statement = dbConnection.createStatement();
 
         String sqlQuery = "SELECT GROUPS.name, COUNT(STUDENTS.student_id) AS number\n" +
                 "FROM GROUPS\n" +
@@ -243,7 +213,7 @@ public class PostgreSQL {
                 "HAVING COUNT(STUDENTS.student_id) < 10;";
 
         ResultSet rs = statement.executeQuery(sqlQuery);
-        while(rs.next()) {
+        while (rs.next()) {
             String name = rs.getString("name");
             int numberOfStudent = rs.getInt("number");
             resultStr += "group " + name + " has " + numberOfStudent + " students";
@@ -254,34 +224,29 @@ public class PostgreSQL {
         return resultStr;
     }
 
-    public void deleteStudentFromGroup() throws SQLException {
-        Connection dbConnection = null;
-        Statement statement = null;
-
-        dbConnection = getDBConnection();
-        statement = dbConnection.createStatement();
+    public void deleteStudentFromGroup(String groupName) throws SQLException {
+        Connection dbConnection = getDBConnection();
+        Statement statement1 = dbConnection.createStatement();
+        Statement statement2 = dbConnection.createStatement();
+        Statement statement3 = dbConnection.createStatement();
 
         String sqlQuery = "SELECT STUDENTS.student_id\n" +
                 "      FROM STUDENTS\n" +
                 "        INNER JOIN  GROUPS ON STUDENTS.group_id = GROUPS.group_id\n" +
-                "      WHERE GROUPS.name = 'SR-01';";
+                "      WHERE GROUPS.name = '" + groupName + "';";
 
-        ResultSet rs = statement.executeQuery(sqlQuery);
-        ArrayList<Integer> l1 = new ArrayList<Integer>();
-        while(rs.next()) {
+        ResultSet rs = statement1.executeQuery(sqlQuery);
+        while (rs.next()) {
             int student_id = rs.getInt("student_id");
-            l1.add(student_id);
+            String sqlDeleteInTableStudentsQuery = "DELETE FROM STUDENTS WHERE STUDENTS.student_id = " + student_id;
+            String sqlDeleteInTableAttendanceOfCoursesQuery = "DELETE FROM ATTENDANCEOFCOURSES WHERE ATTENDANCEOFCOURSES.student_id = " + student_id;
+            statement2.executeUpdate(sqlDeleteInTableAttendanceOfCoursesQuery);
+            statement3.executeUpdate(sqlDeleteInTableStudentsQuery);
         }
-
-        for (Integer item : l1) {
-            String sqlDeleteInTableStudentsQuery = "DELETE FROM STUDENTS WHERE STUDENTS.student_id = " + item;
-            String sqlDeleteInTableAttendanceOfCoursesQuery = "DELETE FROM ATTENDANCEOFCOURSES WHERE ATTENDANCEOFCOURSES.student_id = " + item;
-            statement.executeUpdate(sqlDeleteInTableAttendanceOfCoursesQuery);
-            statement.executeUpdate(sqlDeleteInTableStudentsQuery);
-        }
-
         dbConnection.close();
-        statement.close();
+        statement1.close();
+        statement2.close();
+        statement3.close();
     }
 
-    }
+}
