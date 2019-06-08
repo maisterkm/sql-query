@@ -2,7 +2,7 @@ package ua.com.foxminded.sqlquery;
 
 import java.sql.*;
 
-public class PostgreSQL {
+public class DBhandler {
     private static final String DB_DRIVER = "org.postgresql.Driver";
     private static final String DB_URL = "jdbc:postgresql://localhost:5432/university";
     private static final String USER = "username";
@@ -73,7 +73,7 @@ public class PostgreSQL {
         Statement statement = dbConnection.createStatement();
 
         statement.executeUpdate(insertIntoCoursesTable);
-        System.out.println("Datas has been inserted into table COURSES");
+        System.out.println("Data has been inserted into table COURSES");
 
         dbConnection.close();
         statement.close();
@@ -90,7 +90,7 @@ public class PostgreSQL {
         Statement statement = dbConnection.createStatement();
 
         statement.executeUpdate(insertIntoGroupsTable);
-        System.out.println("Datas has been inserted into table GROUPS");
+        System.out.println("Data has been inserted into table GROUPS");
 
         dbConnection.close();
         statement.close();
@@ -133,7 +133,7 @@ public class PostgreSQL {
         Statement statement = dbConnection.createStatement();
 
         statement.executeUpdate(insertIntoStudentsTable);
-        System.out.println("Datas has been inserted into table STUDENTS");
+        System.out.println("Data has been inserted into table STUDENTS");
 
         dbConnection.close();
         statement.close();
@@ -176,7 +176,7 @@ public class PostgreSQL {
         Statement statement = dbConnection.createStatement();
 
         statement.executeUpdate(insertIntoAttandanceOfCoursesTable);
-        System.out.println("Datas has been inserted into table ATTENDANCEOFCOURSES");
+        System.out.println("Data has been inserted into table ATTENDANCEOFCOURSES");
 
         dbConnection.close();
         statement.close();
@@ -200,19 +200,19 @@ public class PostgreSQL {
         statement.close();
     }
 
-    public static String findGroupWithLessThan10Students() throws SQLException {
+    public static String findGroupWithLessThanNStudents(int numberOfStudents) throws SQLException {
         String resultStr = "";
 
         Connection dbConnection = getDBConnection();
-        Statement statement = dbConnection.createStatement();
 
         String sqlQuery = "SELECT GROUPS.name, COUNT(STUDENTS.student_id) AS number\n" +
                 "FROM GROUPS\n" +
                 "INNER JOIN STUDENTS ON STUDENTS.group_id =GROUPS.group_id\n" +
                 "GROUP BY GROUPS.group_id\n" +
-                "HAVING COUNT(STUDENTS.student_id) < 10;";
-
-        ResultSet rs = statement.executeQuery(sqlQuery);
+                "HAVING COUNT(STUDENTS.student_id) < ?;";
+        PreparedStatement preparedStatement = dbConnection.prepareStatement(sqlQuery);
+        preparedStatement.setInt(1, numberOfStudents);
+        ResultSet rs = preparedStatement.executeQuery();
         while (rs.next()) {
             String name = rs.getString("name");
             int numberOfStudent = rs.getInt("number");
@@ -220,22 +220,23 @@ public class PostgreSQL {
             System.out.println(resultStr);
         }
         dbConnection.close();
-        statement.close();
+        preparedStatement.close();
         return resultStr;
     }
 
     public void deleteStudentFromGroup(String groupName) throws SQLException {
         Connection dbConnection = getDBConnection();
-        Statement statement1 = dbConnection.createStatement();
         Statement statement2 = dbConnection.createStatement();
         Statement statement3 = dbConnection.createStatement();
 
         String sqlQuery = "SELECT STUDENTS.student_id\n" +
                 "      FROM STUDENTS\n" +
                 "        INNER JOIN  GROUPS ON STUDENTS.group_id = GROUPS.group_id\n" +
-                "      WHERE GROUPS.name = '" + groupName + "';";
+                "      WHERE GROUPS.name = ?;";
+        PreparedStatement preparedStatement = dbConnection.prepareStatement(sqlQuery);
+        preparedStatement.setString(1, groupName);
 
-        ResultSet rs = statement1.executeQuery(sqlQuery);
+        ResultSet rs = preparedStatement.executeQuery();
         while (rs.next()) {
             int student_id = rs.getInt("student_id");
             String sqlDeleteInTableStudentsQuery = "DELETE FROM STUDENTS WHERE STUDENTS.student_id = " + student_id;
@@ -245,7 +246,7 @@ public class PostgreSQL {
         }
         System.out.println("All students from group with name \"" + groupName + "\"" + " were deleted");
         dbConnection.close();
-        statement1.close();
+        preparedStatement.close();
         statement2.close();
         statement3.close();
     }
@@ -256,9 +257,7 @@ public class PostgreSQL {
         Statement statement = dbConnection.createStatement();
 
         String sqlQuery = "SELECT\n" +
-                "  SUBQ.name,\n" +
-                "  STUDENTS.first_name,\n" +
-                "  STUDENTS.last_name\n" +
+                "  SUBQ.name,  STUDENTS.first_name,  STUDENTS.last_name\n" +
                 "FROM STUDENTS\n" +
                 "  INNER JOIN (SELECT ATTENDANCEOFCOURSES.student_id, COURSES.name\n" +
                 "              FROM ATTENDANCEOFCOURSES\n" +
